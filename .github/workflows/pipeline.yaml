@@ -42,12 +42,11 @@ jobs:
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
       - name: discord failure reporting
-        uses: rjstone/discord-webhook-notify@89b0bf43c2c8514f70d0dcba4a706b904e8a3112
+        uses: johnnyhuy/actions-discord-git-webhook@ba54912b26910da886c9095317d6da6182a87224
         if: ${{ github.event_name == 'push' && env.SKIP_CONDITION == 'false' && failure()}}
         with:
-          severity: error
-          details: commit ${{ github.event.commits.url }} by ${{ github.event.commits.committer.username }} broke the build ._.
-          webhookUrl: ${{ secrets.DISCORD_WEBHOOK }}
+          webhook_url: ${{ secrets.DISCORD_WEBHOOK }}
+          color: "#FF0000"
     outputs:
       SKIP_CONDITION: ${{ env.SKIP_CONDITION }}
   tag_release:
@@ -62,16 +61,14 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           DEFAULT_BUMP: patch
       - name: discord failure reporting
-        uses: rjstone/discord-webhook-notify@89b0bf43c2c8514f70d0dcba4a706b904e8a3112
+        uses: johnnyhuy/actions-discord-git-webhook@ba54912b26910da886c9095317d6da6182a87224
         if: ${{ github.event_name == 'push' && needs.simple_deployment_pipeline.outputs.SKIP_CONDITION == 'false' && failure()}}
         with:
-          severity: error
-          details: commit ${{ github.event.commits.url }} by ${{ github.event.commits.committer.username }} broke the build ._.
-          webhookUrl: ${{ secrets.DISCORD_WEBHOOK }}
+          webhook_url: ${{ secrets.DISCORD_WEBHOOK }}
+          color: "#FF0000"
       - name: discord success reporting
-        uses: rjstone/discord-webhook-notify@89b0bf43c2c8514f70d0dcba4a706b904e8a3112
+        uses: johnnyhuy/actions-discord-git-webhook@ba54912b26910da886c9095317d6da6182a87224
         if: ${{ github.event_name == 'push' && needs.simple_deployment_pipeline.outputs.SKIP_CONDITION == 'false' && success() }}
         with:
-          severity: info
-          details: a new version of pokedex was deployed!
-          webhookUrl: ${{ secrets.DISCORD_WEBHOOK }}
+          webhook_url: ${{ secrets.DISCORD_WEBHOOK }}
+          color: "##00FF00"
