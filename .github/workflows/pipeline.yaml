@@ -8,6 +8,9 @@ on:
     branches: [main]
     types: [opened, synchronize]
 
+env:
+  SKIP_CONDITION: ${{ github.event.commits == null || contains(github.event.commits[0].message, '#skip') }}
+
 jobs:
   simple_deployment_pipeline:
     runs-on: ubuntu-20.04
@@ -31,16 +34,16 @@ jobs:
           start: npm run start-prod
           wait-on: http://localhost:5000
       - name: set up for deployment
-        if: ${{ github.event_name == 'push' }}
+        if: ${{ github.event_name == 'push' && env.SKIP_CONDITION == 'false'}}
         uses: superfly/flyctl-actions/setup-flyctl@master
       - name: deploy app
-        if: ${{ github.event_name == 'push' }}
+        if: ${{ github.event_name == 'push' && env.SKIP_CONDITION == 'false'}}
         run: flyctl deploy --remote-only
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
   tag_release:
-    if: ${{ github.event_name == 'push' }}
     needs: [simple_deployment_pipeline]
+    if: ${{ github.event_name == 'push' && github.env.SKIP_CONDITION == 'false'}}
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v4
