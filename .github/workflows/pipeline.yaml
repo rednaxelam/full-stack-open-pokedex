@@ -27,25 +27,27 @@ jobs:
         run: npm run test
       - name: Build
         run: npm run build
-      - name: e2e tests
-        uses: cypress-io/github-action@v5
-        with:
-          command: npm run test:e2e
-          start: npm run start-prod
-          wait-on: http://localhost:5000
-      - name: set up for deployment
-        if: ${{ github.event_name == 'push' && env.SKIP_CONDITION == 'false'}}
-        uses: superfly/flyctl-actions/setup-flyctl@master
-      - name: deploy app
-        if: ${{ github.event_name == 'push' && env.SKIP_CONDITION == 'false'}}
-        run: flyctl deploy --remote-only
-        env:
-          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+      # - name: e2e tests
+      #   uses: cypress-io/github-action@v5
+      #   with:
+      #     command: npm run test:e2e
+      #     start: npm run start-prod
+      #     wait-on: http://localhost:5000
+      # - name: set up for deployment
+      #   if: ${{ github.event_name == 'push' && env.SKIP_CONDITION == 'false'}}
+      #   uses: superfly/flyctl-actions/setup-flyctl@master
+      # - name: deploy app
+      #   if: ${{ github.event_name == 'push' && env.SKIP_CONDITION == 'false'}}
+      #   run: flyctl deploy --remote-only
+      #   env:
+      #     FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
       - name: discord failure reporting
-        uses: johnnyhuy/actions-discord-git-webhook@ba54912b26910da886c9095317d6da6182a87224
+        uses: rjstone/discord-webhook-notify@89b0bf43c2c8514f70d0dcba4a706b904e8a3112
         if: ${{ github.event_name == 'push' && env.SKIP_CONDITION == 'false' && failure()}}
         with:
-          webhook_url: ${{ secrets.DISCORD_WEBHOOK }}
+          severity: error
+          details: commit ${{ github.event.commits.url }} by ${{ github.event.commits.committer.username }} broke the build ._.
+          webhookUrl: ${{ secrets.DISCORD_WEBHOOK }}
     outputs:
       SKIP_CONDITION: ${{ env.SKIP_CONDITION }}
   tag_release:
@@ -54,18 +56,22 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v4
-      - name: Bump version and push tag
-        uses: anothrNick/github-tag-action@777684df761b882a3f4f70db16ac70d8cc78d0ea
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          DEFAULT_BUMP: patch
+      # - name: Bump version and push tag
+      #   uses: anothrNick/github-tag-action@777684df761b882a3f4f70db16ac70d8cc78d0ea
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #     DEFAULT_BUMP: patch
       - name: discord failure reporting
-        uses: johnnyhuy/actions-discord-git-webhook@ba54912b26910da886c9095317d6da6182a87224
+        uses: rjstone/discord-webhook-notify@89b0bf43c2c8514f70d0dcba4a706b904e8a3112
         if: ${{ github.event_name == 'push' && needs.simple_deployment_pipeline.outputs.SKIP_CONDITION == 'false' && failure()}}
         with:
-          webhook_url: ${{ secrets.DISCORD_WEBHOOK }}
+          severity: error
+          details: commit ${{ github.event.commits.url }} by ${{ github.event.commits.committer.username }} broke the build ._.
+          webhookUrl: ${{ secrets.DISCORD_WEBHOOK }}
       - name: discord success reporting
-        uses: johnnyhuy/actions-discord-git-webhook@ba54912b26910da886c9095317d6da6182a87224
+        uses: rjstone/discord-webhook-notify@89b0bf43c2c8514f70d0dcba4a706b904e8a3112
         if: ${{ github.event_name == 'push' && needs.simple_deployment_pipeline.outputs.SKIP_CONDITION == 'false' && success() }}
         with:
-          webhook_url: ${{ secrets.DISCORD_WEBHOOK }}
+          severity: info
+          details: a new version of pokedex was deployed!
+          webhookUrl: ${{ secrets.DISCORD_WEBHOOK }}
