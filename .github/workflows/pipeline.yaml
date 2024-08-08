@@ -46,7 +46,7 @@ jobs:
         if: ${{ github.event_name == 'push' && env.SKIP_CONDITION == 'false' && failure()}}
         with:
           webhook_url: ${{ secrets.DISCORD_WEBHOOK }}
-          color: "#FF0000"
+          color: Red
     outputs:
       SKIP_CONDITION: ${{ env.SKIP_CONDITION }}
   tag_release:
@@ -65,10 +65,10 @@ jobs:
         if: ${{ github.event_name == 'push' && needs.simple_deployment_pipeline.outputs.SKIP_CONDITION == 'false' && failure()}}
         with:
           webhook_url: ${{ secrets.DISCORD_WEBHOOK }}
-          color: "#FF0000"
+          color: Red
       - name: discord success reporting
         uses: johnnyhuy/actions-discord-git-webhook@ba54912b26910da886c9095317d6da6182a87224
         if: ${{ github.event_name == 'push' && needs.simple_deployment_pipeline.outputs.SKIP_CONDITION == 'false' && success() }}
         with:
           webhook_url: ${{ secrets.DISCORD_WEBHOOK }}
-          color: "##00FF00"
+          color: Green
