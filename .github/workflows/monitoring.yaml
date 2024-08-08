@@ -1,8 +1,6 @@
 name: Systems Monitoring
 
-on:
-  schedule:
-    - cron: "3/5 * * * *"
+on: workflow_dispatch
 
 jobs:
   URL_Health_Check:
