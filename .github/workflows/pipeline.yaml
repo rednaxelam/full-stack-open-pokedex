@@ -41,9 +41,11 @@ jobs:
         run: flyctl deploy --remote-only
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+    outputs:
+      SKIP_CONDITION: ${{ env.SKIP_CONDITION }}
   tag_release:
     needs: [simple_deployment_pipeline]
-    if: ${{ github.event_name == 'push' && github.env.SKIP_CONDITION == 'false'}}
+    if: ${{ github.event_name == 'push' && needs.simple_deployment_pipeline.outputs.SKIP_CONDITION == 'false'}}
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v4
